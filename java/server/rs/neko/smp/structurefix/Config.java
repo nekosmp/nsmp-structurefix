@@ -23,15 +23,15 @@ public class Config {
 
   public static Object2IntOpenHashMap<String> getConfig() {
     if (config == null) {
-      loadData();
-      saveData();
+      loadFile();
+      saveFile();
     }
     return config;
   }
 
   private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("nsmp-structurefix.json");
 
-  public static void loadData() {
+  public static void loadFile() {
     String json = "{}";
     try {
       json = Files.readString(PATH);
@@ -43,7 +43,7 @@ public class Config {
     }
   }
 
-  public static void saveData() {
+  public static void saveFile() {
     try {
       Files.writeString(PATH, GSON.toJson(config));
     } catch (Exception ex) {

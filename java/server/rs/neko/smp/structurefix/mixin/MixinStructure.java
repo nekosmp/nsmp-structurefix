@@ -16,9 +16,9 @@ import net.minecraft.world.biome.source.BiomeCoords;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil.MultiNoiseSampler;
 import net.minecraft.world.gen.structure.Structure;
-import net.minecraft.world.gen.structure.StructureType;
 import net.minecraft.world.gen.structure.Structure.Context;
 import net.minecraft.world.gen.structure.Structure.StructurePosition;
+import net.minecraft.world.gen.structure.StructureType;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
