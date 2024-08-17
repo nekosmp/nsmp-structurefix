@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "nsmp-structurefix",
+  "version": "${mod_version}+${minecraft_version}",
+  "name": "${mod_name}",
+  "authors": [
+    {
+      "name": "AtakkuDev"
+    }
+  ],
+  "contact": {
+    "homepage": "https://atakku.dev/"
+  },
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "rs.neko.smp.structurefix.StructureFix"
+    ]
+  },
+  "mixins": [
+    "nsmp-structurefix.mixins.json"
+  ],
+  "depends": {
+    "fabric-api": ">=${fabric_version}",
+    "fabricloader": ">=${loader_version}",
+    "minecraft": ">=${minecraft_version}",
+    "java": ">=17"
+  }
+}

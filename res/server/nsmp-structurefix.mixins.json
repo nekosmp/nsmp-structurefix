@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "rs.neko.smp.structurefix.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [],
+  "mixins": [
+    "AccessorStructureContext",
+    "MixinStructure"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
