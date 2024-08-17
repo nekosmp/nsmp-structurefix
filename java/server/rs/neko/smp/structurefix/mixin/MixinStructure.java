@@ -15,6 +15,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeCoords;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil.MultiNoiseSampler;
+import net.minecraft.world.gen.structure.JigsawStructure;
 import net.minecraft.world.gen.structure.Structure;
 import net.minecraft.world.gen.structure.Structure.Context;
 import net.minecraft.world.gen.structure.Structure.StructurePosition;
@@ -37,10 +38,9 @@ abstract class MixinStructure {
       return;
     }
 
-    // Skip all non configured
-    StructureType<?> st = ((Structure) (Object) this).getType();
-    Identifier id = Registries.STRUCTURE_TYPE.getKey(st).get().getValue();
-    if (Config.getRadius(id) <= 0) {
+    Identifier id = getIdentifier();
+    int rad = Config.getRadius(id);
+    if (rad <= 0) {
       // temporary
       StructureFix.LOGGER.info("Skipping structure '{}'", id);
       return;
@@ -58,7 +58,7 @@ abstract class MixinStructure {
       BiomeSource b = c.getChunkGenerator().getBiomeSource();
       MultiNoiseSampler s = c.getNoiseConfig().getMultiNoiseSampler();
 
-      int r = BiomeCoords.fromBlock(Config.getRadius(id));
+      int r = BiomeCoords.fromBlock(rad);
 
       for (int ox= -r; ox<=r; ox++) {
         for (int oz= -r; oz<=r; oz++) {
@@ -74,5 +74,13 @@ abstract class MixinStructure {
       }
       return true;
     }));
+  }
+
+  private Identifier getIdentifier() {
+    if ((Object) this instanceof JigsawStructure) {
+      return ((AccessorJigsawStructure)(Object)this).getStartPool().getKey().get().getValue();
+    }
+    StructureType<?> type = ((Structure) (Object) this).getType();
+    return Registries.STRUCTURE_TYPE.getKey(type).get().getValue();
   }
 }
