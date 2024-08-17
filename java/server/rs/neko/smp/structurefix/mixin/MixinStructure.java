@@ -37,6 +37,15 @@ abstract class MixinStructure {
       return;
     }
 
+    // Skip all non configured
+    StructureType<?> st = ((Structure) (Object) this).getType();
+    Identifier id = Registries.STRUCTURE_TYPE.getKey(st).get().getValue();
+    if (Config.getRadius(id) <= 0) {
+      // temporary
+      StructureFix.LOGGER.info("Skipping structure '{}'", id);
+      return;
+    }
+
     cir.setReturnValue(old.filter(sp -> {
       BlockPos pos = sp.position();
       int x = BiomeCoords.fromBlock(pos.getX());
@@ -48,9 +57,6 @@ abstract class MixinStructure {
       Predicate<RegistryEntry<Biome>> p = c.getBiomePredicate();
       BiomeSource b = c.getChunkGenerator().getBiomeSource();
       MultiNoiseSampler s = c.getNoiseConfig().getMultiNoiseSampler();
-
-      StructureType<?> st = ((Structure) (Object) this).getType();
-      Identifier id = Registries.STRUCTURE_TYPE.getKey(st).get().getValue();
 
       int r = BiomeCoords.fromBlock(Config.getRadius(id));
 
