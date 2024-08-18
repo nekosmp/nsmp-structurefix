@@ -76,12 +76,11 @@ abstract class MixinStructure {
           int cx = x + ox;
           int cz = z + oz;
 
-          if (!p.test(bs.getBiome(cx, y, cz, mns))) {
-            StructureFix.LOGGER.info("Prevented structure '{}' spawn at x:{} y:{} z:{} due to bordering a forbidden biome", rad.left(), pos.getX(), pos.getY(), pos.getZ());
-            return false;
-          }
-
-          heights.add(cg.getHeightInGround(BiomeCoords.toBlock(cx), BiomeCoords.toBlock(cz), Heightmap.Type.WORLD_SURFACE_WG, hlv, nc));
+          //if (!p.test(bs.getBiome(cx, y, cz, mns))) {
+          //  StructureFix.LOGGER.info("Prevented structure '{}' spawn at x:{} y:{} z:{} due to bordering a forbidden biome", rad.left(), pos.getX(), pos.getY(), pos.getZ());
+          //  return false;
+          //}
+          heights.add(cg.getHeightInGround(BiomeCoords.toBlock(cx), BiomeCoords.toBlock(cz), Heightmap.Type.OCEAN_FLOOR_WG, hlv, nc));
         }
       }
 
