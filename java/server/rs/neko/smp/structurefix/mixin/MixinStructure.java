@@ -24,13 +24,10 @@ import net.minecraft.world.gen.structure.JigsawStructure;
 import net.minecraft.world.gen.structure.Structure;
 import net.minecraft.world.gen.structure.Structure.Context;
 import net.minecraft.world.gen.structure.Structure.StructurePosition;
+import net.minecraft.world.gen.structure.StructureType;
 
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
-
-import net.minecraft.world.gen.structure.StructureType;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
