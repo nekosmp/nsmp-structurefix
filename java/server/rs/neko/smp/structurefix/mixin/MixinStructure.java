@@ -19,6 +19,9 @@ import net.minecraft.world.gen.structure.JigsawStructure;
 import net.minecraft.world.gen.structure.Structure;
 import net.minecraft.world.gen.structure.Structure.Context;
 import net.minecraft.world.gen.structure.Structure.StructurePosition;
+
+import it.unimi.dsi.fastutil.Pair;
+
 import net.minecraft.world.gen.structure.StructureType;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,13 +41,9 @@ abstract class MixinStructure {
       return;
     }
 
-    Identifier id = getIdentifier();
-    int rad = Config.getRadius(id);
-    if (rad <= 0) {
-      // temporary
-      StructureFix.LOGGER.info("Skipping structure '{}'", id);
+    Pair<Identifier, Integer> rad = getStructureRadius();
+    if (rad == null)
       return;
-    }
 
     cir.setReturnValue(old.filter(sp -> {
       BlockPos pos = sp.position();
@@ -58,7 +57,7 @@ abstract class MixinStructure {
       BiomeSource b = c.getChunkGenerator().getBiomeSource();
       MultiNoiseSampler s = c.getNoiseConfig().getMultiNoiseSampler();
 
-      int r = BiomeCoords.fromBlock(rad);
+      int r = BiomeCoords.fromBlock(rad.right());
 
       for (int ox= -r; ox<=r; ox++) {
         for (int oz= -r; oz<=r; oz++) {
@@ -67,7 +66,7 @@ abstract class MixinStructure {
           }
 
           if (!p.test(b.getBiome(x + oz, y, z + oz, s))) {
-            StructureFix.LOGGER.info("Prevented structure '{}' spawn at x:{} y:{} z:{}", id, pos.getX(), pos.getY(), pos.getZ());
+            StructureFix.LOGGER.info("Prevented structure '{}' spawn at x:{} y:{} z:{}", rad.left(), pos.getX(), pos.getY(), pos.getZ());
             return false;
           }
         }
@@ -76,11 +75,20 @@ abstract class MixinStructure {
     }));
   }
 
-  private Identifier getIdentifier() {
-    if ((Object) this instanceof JigsawStructure) {
-      return ((AccessorJigsawStructure)(Object)this).getStartPool().getKey().get().getValue();
-    }
+  private Pair<Identifier, Integer> getStructureRadius() {
     StructureType<?> type = ((Structure) (Object) this).getType();
-    return Registries.STRUCTURE_TYPE.getKey(type).get().getValue();
+    Identifier fallback = Registries.STRUCTURE_TYPE.getKey(type).get().getValue();
+    if ((Object) this instanceof JigsawStructure) {
+      Identifier id = ((AccessorJigsawStructure)(Object)this).getStartPool().getKey().get().getValue();
+      int rad = Config.getRadius(id);
+      if (rad > 0)
+        return Pair.of(id, rad);
+      StructureFix.LOGGER.info("No radius defined for jigsaw structure '{}', falling back to structure type '{}'", id, fallback);
+    }
+    int rad = Config.getRadius(fallback);
+    if (rad > 0)
+        return Pair.of(fallback, rad);
+    StructureFix.LOGGER.info("No radius defined for structure type '{}', skipping", fallback);
+    return null;
   }
 }
