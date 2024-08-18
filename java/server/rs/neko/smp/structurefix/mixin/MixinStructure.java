@@ -4,6 +4,7 @@
 
 package rs.neko.smp.structurefix.mixin;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -11,16 +12,22 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.HeightLimitView;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeCoords;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil.MultiNoiseSampler;
+import net.minecraft.world.gen.chunk.ChunkGenerator;
+import net.minecraft.world.gen.noise.NoiseConfig;
 import net.minecraft.world.gen.structure.JigsawStructure;
 import net.minecraft.world.gen.structure.Structure;
 import net.minecraft.world.gen.structure.Structure.Context;
 import net.minecraft.world.gen.structure.Structure.StructurePosition;
 
 import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 
 import net.minecraft.world.gen.structure.StructureType;
 
@@ -34,7 +41,7 @@ import rs.neko.smp.structurefix.StructureFix;
 @Mixin(Structure.class)
 abstract class MixinStructure {
   @Inject(method = "getValidStructurePosition(Lnet/minecraft/world/gen/structure/Structure$Context;)Ljava/util/Optional;", at = @At("RETURN"), cancellable = true)
-  public void getValidStructurePosition(Context ctx, CallbackInfoReturnable<Optional<StructurePosition>> cir) {
+  public void getValidStructurePosition(Context c, CallbackInfoReturnable<Optional<StructurePosition>> cir) {
     Optional<StructurePosition> old = cir.getReturnValue();
 
     if (old.isEmpty()) {
@@ -42,7 +49,7 @@ abstract class MixinStructure {
     }
 
     Pair<Identifier, Integer> rad = getStructureRadius();
-    if (rad == null)
+    if (rad == null || rad.second() == 0)
       return;
 
     cir.setReturnValue(old.filter(sp -> {
@@ -51,26 +58,43 @@ abstract class MixinStructure {
       int y = BiomeCoords.fromBlock(pos.getY());
       int z = BiomeCoords.fromBlock(pos.getZ());
 
-      // Ducked the context for access
-      AccessorStructureContext c = ((AccessorStructureContext) (Object) ctx);
-      Predicate<RegistryEntry<Biome>> p = c.getBiomePredicate();
-      BiomeSource b = c.getChunkGenerator().getBiomeSource();
-      MultiNoiseSampler s = c.getNoiseConfig().getMultiNoiseSampler();
+      Predicate<RegistryEntry<Biome>> p = c.biomePredicate();
+      ChunkGenerator cg = c.chunkGenerator();
+      BiomeSource bs = cg.getBiomeSource();
+      NoiseConfig nc = c.noiseConfig();
+      MultiNoiseSampler mns = nc.getMultiNoiseSampler();
+      HeightLimitView hlv = c.world();
 
       int r = BiomeCoords.fromBlock(rad.right());
 
+      IntArrayList heights = new IntArrayList();
+
+      // Check for bordering with unwanted biomes (e.g. rivers), and sample flatness
       for (int ox= -r; ox<=r; ox++) {
         for (int oz= -r; oz<=r; oz++) {
           if (ox == 0 && oz == 0) {
             continue;
           }
 
-          if (!p.test(b.getBiome(x + oz, y, z + oz, s))) {
-            StructureFix.LOGGER.info("Prevented structure '{}' spawn at x:{} y:{} z:{}", rad.left(), pos.getX(), pos.getY(), pos.getZ());
+          int cx = x + ox;
+          int cz = z + oz;
+
+          if (!p.test(bs.getBiome(cx, y, cz, mns))) {
+            StructureFix.LOGGER.info("Prevented structure '{}' spawn at x:{} y:{} z:{} due to bordering a forbidden biome", rad.left(), pos.getX(), pos.getY(), pos.getZ());
             return false;
           }
+
+          heights.add(cg.getHeightInGround(BiomeCoords.toBlock(cx), BiomeCoords.toBlock(cz), Heightmap.Type.WORLD_SURFACE_WG, hlv, nc));
         }
       }
+
+      int min = Collections.min(heights);
+      int max = Collections.max(heights);
+      if (max - min > rad.right() / 4) {
+        StructureFix.LOGGER.info("Prevented structure '{}' spawn at x:{} y:{} z:{} due to uneven terrain", rad.left(), pos.getX(), pos.getY(), pos.getZ());
+        return false;
+      }
+
       return true;
     }));
   }
@@ -80,13 +104,13 @@ abstract class MixinStructure {
     Identifier fallback = Registries.STRUCTURE_TYPE.getKey(type).get().getValue();
     if ((Object) this instanceof JigsawStructure) {
       Identifier id = ((AccessorJigsawStructure)(Object)this).getStartPool().getKey().get().getValue();
-      int rad = Config.getRadius(id);
-      if (rad > 0)
+      Integer rad = Config.getRadius(id);
+      if (rad != null)
         return Pair.of(id, rad);
       StructureFix.LOGGER.info("No radius defined for jigsaw structure '{}', falling back to structure type '{}'", id, fallback);
     }
-    int rad = Config.getRadius(fallback);
-    if (rad > 0)
+    Integer rad = Config.getRadius(fallback);
+    if (rad != null)
         return Pair.of(fallback, rad);
     StructureFix.LOGGER.info("No radius defined for structure type '{}', skipping", fallback);
     return null;

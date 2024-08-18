@@ -5,7 +5,6 @@
   "client": [],
   "mixins": [
     "AccessorJigsawStructure",
-    "AccessorStructureContext",
     "MixinStructure"
   ],
   "injectors": {

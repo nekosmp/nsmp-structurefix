@@ -51,7 +51,10 @@ public class Config {
     }
   }
 
-  public static int getRadius(Identifier id) {
-    return getConfig().getOrDefault(id.toString(), 0);
+  public static Integer getRadius(Identifier id) {
+    String id_string = id.toString();
+    if (!getConfig().containsKey(id_string))
+      return null;
+    return Math.max(getConfig().getInt(id_string), 0);
   }
 }
