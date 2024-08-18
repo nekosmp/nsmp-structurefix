@@ -87,7 +87,7 @@ abstract class MixinStructure {
 
       int min = Collections.min(heights);
       int mid = pos.getY();
-      if (mid - min > 7) {
+      if (mid - min > 4) {
         StructureFix.LOGGER.info("Prevented structure '{}' spawn at x:{} y:{} z:{} due to too much drop", rad.left(), pos.getX(), pos.getY(), pos.getZ());
         return false;
       }
