@@ -2,7 +2,7 @@
 //
 // This project is dual licensed under MIT and Apache.
 
-package rs.neko.smp.structurefix;
+package dev.atakku.fsmp.structurefix;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +29,7 @@ public class Config {
     return config;
   }
 
-  private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("nsmp-structurefix.json");
+  private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("fsmp-structurefix.json");
 
   public static void loadFile() {
     String json = "{}";
@@ -55,6 +55,6 @@ public class Config {
     String id_string = id.toString();
     if (!getConfig().containsKey(id_string))
       return null;
-    return Math.max(getConfig().getInt(id_string), 0);
+    return Math.max(getConfig().getInt(id_string) / 2, 0);
   }
 }

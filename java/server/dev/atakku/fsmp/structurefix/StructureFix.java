@@ -2,7 +2,7 @@
 //
 // This project is dual licensed under MIT and Apache.
 
-package rs.neko.smp.structurefix;
+package dev.atakku.fsmp.structurefix;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -14,20 +14,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class StructureFix implements ModInitializer {
-  public static final String MOD_ID = "nsmp-structurefix";
+  public static final String MOD_ID = "fsmp-structurefix";
   public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
   @Override
   public void onInitialize() {
-    LOGGER.info("Initializing NSMP StructureFix");
+    LOGGER.info("Initializing FSMP StructureFix");
     CommandRegistrationCallback.EVENT.register((d, r, e) -> {
-      d.register(literal("nsmp-structurefix").requires(s -> s.hasPermissionLevel(2))
+      d.register(literal("fsmp-structurefix").requires(s -> s.hasPermissionLevel(2))
           .then(literal("reload").executes(ctx -> {
             Config.loadFile();
-            ctx.getSource().sendFeedback(() -> Text.literal("Reloaded Structure Fix config"), false);
+            ctx.getSource().sendFeedback(() -> Text.literal("Reloaded StructureFix config"), false);
             return 1;
           })).then(literal("place_missing").executes(ctx -> {
-            //todo
+            // todo
             ctx.getSource().sendFeedback(() -> Text.literal("Placed missing structures"), false);
             return 1;
           })));

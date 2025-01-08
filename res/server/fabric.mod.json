@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "nsmp-structurefix",
+  "id": "fsmp-structurefix",
   "version": "${mod_version}+${minecraft_version}",
   "name": "${mod_name}",
   "authors": [
@@ -14,11 +14,11 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "rs.neko.smp.structurefix.StructureFix"
+      "dev.atakku.fsmp.structurefix.StructureFix"
     ]
   },
   "mixins": [
-    "nsmp-structurefix.mixins.json"
+    "fsmp-structurefix.mixins.json"
   ],
   "depends": {
     "fabric-api": ">=${fabric_version}",

@@ -2,7 +2,7 @@
 //
 // This project is dual licensed under MIT and Apache.
 
-package rs.neko.smp.structurefix.mixin;
+package dev.atakku.fsmp.structurefix.mixin;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -32,8 +32,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import rs.neko.smp.structurefix.Config;
-import rs.neko.smp.structurefix.StructureFix;
+import dev.atakku.fsmp.structurefix.Config;
+import dev.atakku.fsmp.structurefix.StructureFix;
 
 @Mixin(Structure.class)
 abstract class MixinStructure {
@@ -51,49 +51,34 @@ abstract class MixinStructure {
 
     cir.setReturnValue(old.filter(sp -> {
       BlockPos pos = sp.position();
-      int x = BiomeCoords.fromBlock(pos.getX());
-      int y = BiomeCoords.fromBlock(pos.getY());
-      int z = BiomeCoords.fromBlock(pos.getZ());
+      int x = pos.getX();
+      int z = pos.getZ();
+      int r = rad.right();
 
-      Predicate<RegistryEntry<Biome>> p = c.biomePredicate();
       ChunkGenerator cg = c.chunkGenerator();
-      BiomeSource bs = cg.getBiomeSource();
       NoiseConfig nc = c.noiseConfig();
-      MultiNoiseSampler mns = nc.getMultiNoiseSampler();
       HeightLimitView hlv = c.world();
-
-      int r = BiomeCoords.fromBlock(rad.right());
 
       IntArrayList heights = new IntArrayList();
 
-      // Check for bordering with unwanted biomes (e.g. rivers), and sample flatness
+      // Sample heightmap
       for (int ox= -r; ox<=r; ox++) {
         for (int oz= -r; oz<=r; oz++) {
-          if (ox == 0 && oz == 0) {
-            continue;
-          }
-
-          int cx = x + ox;
-          int cz = z + oz;
-
-          //if (!p.test(bs.getBiome(cx, y, cz, mns))) {
-          //  StructureFix.LOGGER.info("Prevented structure '{}' spawn at x:{} y:{} z:{} due to bordering a forbidden biome", rad.left(), pos.getX(), pos.getY(), pos.getZ());
-          //  return false;
-          //}
-          heights.add(cg.getHeightInGround(BiomeCoords.toBlock(cx), BiomeCoords.toBlock(cz), Heightmap.Type.OCEAN_FLOOR_WG, hlv, nc));
+          heights.add(cg.getHeightOnGround(x + ox, z + oz, Heightmap.Type.OCEAN_FLOOR_WG, hlv, nc));
         }
       }
+
+      
 
       int min = Collections.min(heights);
       int mid = pos.getY();
       int max = Collections.max(heights);
-      if (mid - min > 4) {
+      if (mid - min > 5) {
         StructureFix.LOGGER.info("Prevented structure '{}' spawn at x:{} y:{} z:{} due to too much drop", rad.left(), pos.getX(), pos.getY(), pos.getZ());
-        StructureFix.LOGGER.info("min: {} mid: {} max: {}", min, mid, max);
         return false;
       }
       if (max - mid > 7) {
-        StructureFix.LOGGER.info("Prevented structure '{}' spawn at x:{} y:{} z:{} due to too much elevation", rad.left(), pos.getX(), pos.getY(), pos.getZ());
+        StructureFix.LOGGER.info("Would have prevented structure '{}' spawn at x:{} y:{} z:{} due to too much elevation", rad.left(), pos.getX(), pos.getY(), pos.getZ());
         // TODO: testing for now
         //return false;
       }
