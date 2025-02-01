@@ -6,18 +6,12 @@ package dev.atakku.fsmp.structurefix.mixin;
 
 import java.util.Collections;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.HeightLimitView;
 import net.minecraft.world.Heightmap;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeCoords;
-import net.minecraft.world.biome.source.BiomeSource;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil.MultiNoiseSampler;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.noise.NoiseConfig;
 import net.minecraft.world.gen.structure.JigsawStructure;
@@ -67,8 +61,6 @@ abstract class MixinStructure {
           heights.add(cg.getHeightOnGround(x + ox, z + oz, Heightmap.Type.OCEAN_FLOOR_WG, hlv, nc));
         }
       }
-
-      
 
       int min = Collections.min(heights);
       int mid = pos.getY();

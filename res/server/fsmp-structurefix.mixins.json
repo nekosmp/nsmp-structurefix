@@ -4,8 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "client": [],
   "mixins": [
-    "AccessorJigsawStructure",
-    "MixinStructure"
+    "MixinStructureLocator"
   ],
   "injectors": {
     "defaultRequire": 1
