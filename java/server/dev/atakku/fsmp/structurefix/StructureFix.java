@@ -17,6 +17,8 @@ public class StructureFix implements ModInitializer {
   public static final String MOD_ID = "fsmp-structurefix";
   public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+  public static final int RADIUS = 8;
+
   @Override
   public void onInitialize() {
     LOGGER.info("Initializing FSMP StructureFix");
